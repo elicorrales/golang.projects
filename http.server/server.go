@@ -1,23 +1,32 @@
 package main
 
-
 import (
     "fmt"
     "net/http"
     "github.com/gorilla/mux"
+    "time"
+    "sync"
 )
 
+const port = "8090"
+
+var mutex = &sync.Mutex{}
 
 var value  = "0"
 
 func post_value(writer http.ResponseWriter , request *http.Request ) {
     vars := mux.Vars(request)
-    fmt.Println("method:" + request.Method)
-    fmt.Println(request.URL)
-    fmt.Println(vars)
-    fmt.Println(vars["value"])
-    value = vars["value"]
-    fmt.Fprintf(writer, "Hello")
+    valueIn := vars["value"]
+    //mutex.Lock()
+    value = valueIn
+    time.Sleep(1 * time.Millisecond)
+    valueNow := value
+    //mutex.Unlock()
+    if valueNow == valueIn {
+        fmt.Fprintf(writer, ".")
+    } else {
+        fmt.Fprintf(writer, "E")
+    }
 }
 
 
@@ -29,5 +38,8 @@ func main() {
 
     http.Handle("/",rtr)
 
-    http.ListenAndServe(":8090",nil)
+    fmt.Println("Server up and listening at " + port)
+
+    http.ListenAndServe(":" + port,nil)
+
 }
