@@ -25,21 +25,16 @@ func post_value(writer http.ResponseWriter , request *http.Request ) {
     if valueNow == valueIn {
         fmt.Fprintf(writer, ".")
     } else {
+        fmt.Print("E")
         fmt.Fprintf(writer, "E")
     }
 }
 
 
 func main() {
-
     rtr := mux.NewRouter()
-
     rtr.HandleFunc("/value/{value:[0-9]+}",post_value)
-
     http.Handle("/",rtr)
-
     fmt.Println("Server up and listening at " + port)
-
     http.ListenAndServe(":" + port,nil)
-
 }
