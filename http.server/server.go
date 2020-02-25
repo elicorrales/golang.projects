@@ -17,11 +17,11 @@ var value  = "0"
 func post_value(writer http.ResponseWriter , request *http.Request ) {
     vars := mux.Vars(request)
     valueIn := vars["value"]
-    //mutex.Lock()
+    mutex.Lock()
     value = valueIn
     time.Sleep(1 * time.Millisecond)
     valueNow := value
-    //mutex.Unlock()
+    mutex.Unlock()
     if valueNow == valueIn {
         fmt.Fprintf(writer, ".")
     } else {
