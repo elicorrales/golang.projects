@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-const maxBooks = 10
+const maxBooks = 50
 
 var cache = map[int]Book{}
 
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func main() {
+var lenOfCache = 0
 
-	queryCacheAndDatabaseLoop()
+func main() {
 
 	queryCacheAndDatabaseLoop()
 
@@ -22,37 +22,44 @@ func main() {
 
 func queryCacheAndDatabaseLoop() {
 
-	cacheCount := 0
-	dbCount := 0
+	start := time.Now().UnixNano()
 
 	for i := 0; i < maxBooks; i++ {
 
-		id := rnd.Intn(maxBooks) + 1
+		if lenOfCache == 10 {
+			println("All books in cache")
+			break
+		}
+
+		id := rnd.Intn(10) + 1
 		//id := i + 1
 
-		if b, ok := queryCache(id); ok {
-
-			fmt.Printf("In cache : %d, %t, %+v\n", id, ok, b)
-			cacheCount++
-			continue
-
-		}
-
-		if b, ok := queryDatabase(id); ok {
-
-			fmt.Printf("In DB: %d, %t, %+v\n", id, ok, b)
-			dbCount++
-			continue
-		}
-
-		fmt.Printf("================ %d not found.\n", id)
+		queryCacheAndDatabase(id)
 
 		//gives cache time to receive new data in concurrent operation (???)
-		time.Sleep(150 * time.Millisecond)
-
+		time.Sleep(120 * time.Millisecond)
 	}
 
-	fmt.Printf("Cache hits: %d , DB hits: %d ===========================\n", cacheCount, dbCount)
+	end := time.Now().UnixNano()
+
+	delta := end - start
+
+	println("------------------------")
+	println(delta / 1000000)
+
+}
+
+func queryCacheAndDatabase(id int) {
+
+	go func(id int) {
+		if _, ok := queryCache(id); ok {
+			fmt.Printf("In cache : %d, %t, %+v\n", len(cache))
+			lenOfCache = len(cache)
+		}
+	}(id)
+
+	go queryDatabase(id)
+	//queryDatabase(id)
 
 }
 
