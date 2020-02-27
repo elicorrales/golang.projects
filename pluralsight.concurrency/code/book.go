@@ -76,66 +76,65 @@ var books = []Book{
 		Author:        "John Scalzi",
 		YearPublished: 2006,
 	},
-	/*
-		Book{
-			ID:            11,
-			Title:         "The Hitchhiker's Guide to the Galaxy",
-			Author:        "Douglas Adams",
-			YearPublished: 1979,
-		},
-		Book{
-			ID:            12,
-			Title:         "The Hobbit",
-			Author:        "J.R.R. Tolkien",
-			YearPublished: 1937,
-		},
-		Book{
-			ID:            13,
-			Title:         "A Tale of Two Cities",
-			Author:        "Charles Dickens",
-			YearPublished: 1859,
-		},
-		Book{
-			ID:            14,
-			Title:         "Les Miserables",
-			Author:        "Victor Hugo",
-			YearPublished: 1862,
-		},
-		Book{
-			ID:            15,
-			Title:         "Harry Potter and the Philosopher's Stone",
-			Author:        "J.K. Rowling",
-			YearPublished: 1997,
-		},
-		Book{
-			ID:            16,
-			Title:         "I, Robot",
-			Author:        "Isaac Asimov",
-			YearPublished: 1950,
-		},
-		Book{
-			ID:            17,
-			Title:         "The Gods THemselves",
-			Author:        "Isaac Asimov",
-			YearPublished: 1973,
-		},
-		Book{
-			ID:            18,
-			Title:         "The Moon is a Harsh Mistress",
-			Author:        "Robert A. Heinlein",
-			YearPublished: 1966,
-		},
-		Book{
-			ID:            19,
-			Title:         "On Basilisk Station",
-			Author:        "David Weber",
-			YearPublished: 1993,
-		},
-		Book{
-			ID:            20,
-			Title:         "The Android's Dream",
-			Author:        "John Scalzi",
-			YearPublished: 2006,
-		},
-	*/
+
+	Book{
+		ID:            11,
+		Title:         "The Hitchhiker's Guide to the Galaxy",
+		Author:        "Douglas Adams",
+		YearPublished: 1979,
+	},
+	Book{
+		ID:            12,
+		Title:         "The Hobbit",
+		Author:        "J.R.R. Tolkien",
+		YearPublished: 1937,
+	},
+	Book{
+		ID:            13,
+		Title:         "A Tale of Two Cities",
+		Author:        "Charles Dickens",
+		YearPublished: 1859,
+	},
+	Book{
+		ID:            14,
+		Title:         "Les Miserables",
+		Author:        "Victor Hugo",
+		YearPublished: 1862,
+	},
+	Book{
+		ID:            15,
+		Title:         "Harry Potter and the Philosopher's Stone",
+		Author:        "J.K. Rowling",
+		YearPublished: 1997,
+	},
+	Book{
+		ID:            16,
+		Title:         "I, Robot",
+		Author:        "Isaac Asimov",
+		YearPublished: 1950,
+	},
+	Book{
+		ID:            17,
+		Title:         "The Gods THemselves",
+		Author:        "Isaac Asimov",
+		YearPublished: 1973,
+	},
+	Book{
+		ID:            18,
+		Title:         "The Moon is a Harsh Mistress",
+		Author:        "Robert A. Heinlein",
+		YearPublished: 1966,
+	},
+	Book{
+		ID:            19,
+		Title:         "On Basilisk Station",
+		Author:        "David Weber",
+		YearPublished: 1993,
+	},
+	Book{
+		ID:            20,
+		Title:         "The Android's Dream",
+		Author:        "John Scalzi",
+		YearPublished: 2006,
+	},
 }

@@ -50,6 +50,30 @@ func queryCacheAndDatabaseLoop() {
 
 	start := time.Now().UnixNano()
 
+	if doConcurrently {
+		go kickOffQueryGoRoutines()
+	} else {
+		kickOffQueryGoRoutines()
+	}
+
+	//wait on goroutines to finish
+	for lenOfCache < len(books) {
+		println("Waiting on cache to fill")
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	end := time.Now().UnixNano()
+
+	delta := end - start
+
+	println("")
+	println("------------------------")
+	println(delta / 1000000)
+
+}
+
+func kickOffQueryGoRoutines() {
+
 	for i := 0; i < maxBooks; i++ {
 
 		print(lenOfCache)
@@ -78,34 +102,21 @@ func queryCacheAndDatabaseLoop() {
 		time.Sleep(sleepTime * time.Millisecond)
 	}
 
-	println("eli")
-	println(lenOfCache)
-	println(len(books))
-
-	for lenOfCache < len(books) {
-		println("Waiting on cache to fill")
-		time.Sleep(1000 * time.Millisecond)
-	}
-
-	end := time.Now().UnixNano()
-
-	delta := end - start
-
-	println("")
-	println("------------------------")
-	println(delta / 1000000)
-
 }
 
+// this query's purpose really is just to track num books in cache
 func queryCache(id int) {
 	if _, ok := cache[id]; ok {
 		lenOfCache = len(cache)
 	}
 }
 
+// if book is found in database, it is automatically added to cache.
+// since it's map, we can re-add without any effects..no need to test.
+// based on key.
 func queryDatabase(id int) {
 
-	time.Sleep(400 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	for _, b := range books {
 		if b.ID == id {
 			//add found book to cache
