@@ -5,12 +5,17 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
+
+var mutex = &sync.Mutex{}
 
 var maxBooks = 200
 var sleepTime time.Duration = 80
 var doConcurrently = false
+var doWriteLock = false
+var doReadLock = false
 
 var cache = map[int]Book{}
 
@@ -29,9 +34,19 @@ func configureAccordingToParams() {
 
 	loops, mbErr := strconv.Atoi(os.Args[1])
 	sleep, slErr := strconv.Atoi(os.Args[2])
+
 	if len(os.Args) > 3 && os.Args[3] == "m" {
 		doConcurrently = true
 	}
+
+	if len(os.Args) > 4 && os.Args[4] == "y" {
+		doWriteLock = true
+	}
+
+	if len(os.Args) > 5 && os.Args[5] == "y" {
+		doReadLock = true
+	}
+
 	println(loops)
 	fmt.Printf("loops err: %s\n", mbErr)
 	println(sleep)
@@ -106,8 +121,14 @@ func kickOffQueryGoRoutines() {
 
 // this query's purpose really is just to track num books in cache
 func queryCache(id int) {
+	if doReadLock {
+		mutex.Lock()
+	}
 	if _, ok := cache[id]; ok {
 		lenOfCache = len(cache)
+	}
+	if doReadLock {
+		mutex.Unlock()
 	}
 }
 
@@ -120,7 +141,13 @@ func queryDatabase(id int) {
 	for _, b := range books {
 		if b.ID == id {
 			//add found book to cache
+			if doWriteLock {
+				mutex.Lock()
+			}
 			cache[id] = b
+			if doWriteLock {
+				mutex.Unlock()
+			}
 			return
 		}
 	}
