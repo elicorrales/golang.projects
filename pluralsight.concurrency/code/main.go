@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -47,10 +47,10 @@ func configureAccordingToParams() {
 		doReadLock = true
 	}
 
-	println(loops)
-	fmt.Printf("loops err: %s\n", mbErr)
-	println(sleep)
-	fmt.Printf("loop sleep err: %s\n", slErr)
+	//println(loops)
+	//fmt.Printf("loops err: %s\n", mbErr)
+	//println(sleep)
+	//fmt.Printf("loop sleep err: %s\n", slErr)
 
 	if mbErr != nil || slErr != nil {
 		os.Exit(1)
@@ -73,8 +73,17 @@ func queryCacheAndDatabaseLoop() {
 
 	//wait on goroutines to finish
 	for lenOfCache < len(books) {
-		println("Waiting on cache to fill")
-		time.Sleep(100 * time.Millisecond)
+		println("")
+		println("_W_")
+		time.Sleep(20000 * time.Microsecond)
+		//if (time.Now().UnixNano()-start)/1000000 > 1000 {
+		if (time.Now().UnixNano()-start)/1000 > 1000000 {
+			println("")
+			println("Timed out waiting for queries to complete.")
+			print("Was able to load ")
+			println(lenOfCache)
+			break
+		}
 	}
 
 	end := time.Now().UnixNano()
@@ -83,7 +92,10 @@ func queryCacheAndDatabaseLoop() {
 
 	println("")
 	println("------------------------")
-	println(delta / 1000000)
+	print(delta / 1000000)
+	println(" ms")
+	print(delta / 1000)
+	println(" us")
 
 }
 
@@ -95,6 +107,7 @@ func kickOffQueryGoRoutines() {
 		print(" ")
 
 		if lenOfCache == len(books) {
+			println("")
 			println("All books in cache")
 			break
 		}
@@ -114,7 +127,7 @@ func kickOffQueryGoRoutines() {
 		// are quickly started, then this loop is done,
 		// then main quits before all the goroutines
 		// have a chance to run
-		time.Sleep(sleepTime * time.Millisecond)
+		time.Sleep(sleepTime * time.Microsecond)
 	}
 
 }
@@ -137,7 +150,7 @@ func queryCache(id int) {
 // based on key.
 func queryDatabase(id int) {
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(80000 * time.Microsecond)
 	for _, b := range books {
 		if b.ID == id {
 			//add found book to cache
