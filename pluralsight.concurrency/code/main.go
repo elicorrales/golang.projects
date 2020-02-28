@@ -47,11 +47,6 @@ func configureAccordingToParams() {
 		doReadLock = true
 	}
 
-	//println(loops)
-	//fmt.Printf("loops err: %s\n", mbErr)
-	//println(sleep)
-	//fmt.Printf("loop sleep err: %s\n", slErr)
-
 	if mbErr != nil || slErr != nil {
 		os.Exit(1)
 	}
@@ -75,9 +70,10 @@ func queryCacheAndDatabaseLoop() {
 	for lenOfCache < len(books) {
 		println("")
 		println("_W_")
-		time.Sleep(20000 * time.Microsecond)
-		//if (time.Now().UnixNano()-start)/1000000 > 1000 {
-		if (time.Now().UnixNano()-start)/1000 > 1000000 {
+		time.Sleep(20 * time.Millisecond)
+		//time.Sleep(20000 * time.Microsecond)
+		if (time.Now().UnixNano()-start)/1000000 > 1000 {
+			//if (time.Now().UnixNano()-start)/1000 > 1000000 {
 			println("")
 			println("Timed out waiting for queries to complete.")
 			print("Was able to load ")
@@ -113,8 +109,6 @@ func kickOffQueryGoRoutines() {
 		}
 
 		id := rnd.Intn(len(books)) + 1
-		//id := i + 1
-
 		if doConcurrently {
 			go queryCache(id)
 			go queryDatabase(id)
