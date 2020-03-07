@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	//	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -31,6 +31,11 @@ func main() {
 }
 
 func configureAccordingToParams() {
+
+	if len(os.Args) < 3 {
+		println("prog <loops> <sleep> <s|m> <y> <y>")
+		os.Exit(0)
+	}
 
 	loops, mbErr := strconv.Atoi(os.Args[1])
 	sleep, slErr := strconv.Atoi(os.Args[2])
@@ -68,8 +73,8 @@ func queryCacheAndDatabaseLoop() {
 
 	//wait on goroutines to finish
 	for lenOfCache < len(books) {
-		println("")
-		println("_W_")
+		//println("")
+		//println("_W_")
 		time.Sleep(20 * time.Millisecond)
 		//time.Sleep(20000 * time.Microsecond)
 		if (time.Now().UnixNano()-start)/1000000 > 1000 {
@@ -99,9 +104,6 @@ func kickOffQueryGoRoutines() {
 
 	for i := 0; i < maxBooks; i++ {
 
-		print(lenOfCache)
-		print(" ")
-
 		if lenOfCache == len(books) {
 			println("")
 			println("All books in cache")
@@ -121,7 +123,12 @@ func kickOffQueryGoRoutines() {
 		// are quickly started, then this loop is done,
 		// then main quits before all the goroutines
 		// have a chance to run
-		time.Sleep(sleepTime * time.Microsecond)
+		time.Sleep(sleepTime * time.Millisecond)
+
+		//print(" len:")
+		print(lenOfCache)
+		print(" ")
+
 	}
 
 }
@@ -131,8 +138,11 @@ func queryCache(id int) {
 	if doReadLock {
 		mutex.Lock()
 	}
-	if _, ok := cache[id]; ok {
+	_, ok := cache[id]
+	if ok {
 		lenOfCache = len(cache)
+	} else {
+		//println("e")
 	}
 	if doReadLock {
 		mutex.Unlock()
@@ -147,6 +157,7 @@ func queryDatabase(id int) {
 	time.Sleep(80000 * time.Microsecond)
 	for _, b := range books {
 		if b.ID == id {
+			//fmt.Printf("rid:%d b.ID:%d ->same, added\n", id, b.ID)
 			//add found book to cache
 			if doWriteLock {
 				mutex.Lock()
