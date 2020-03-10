@@ -1,7 +1,7 @@
 package main
 
 import (
-	//	"fmt"
+	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -11,8 +11,10 @@ import (
 
 var mutex = &sync.Mutex{}
 
-var maxBooks = 200
-var sleepTime time.Duration = 80
+var maxBooks = 0
+var maxLoops = 0
+var sleepTime time.Duration = 0
+var doRandom = false
 var doConcurrently = false
 var doWriteLock = false
 var doReadLock = false
@@ -25,50 +27,27 @@ var lenOfCache = 0
 
 func main() {
 
-	configureAccordingToParams()
-
-	queryCacheAndDatabaseLoop()
-}
-
-func configureAccordingToParams() {
-
-	if len(os.Args) < 3 {
-		println("prog <loops> <sleep> <s|m> <y> <y>")
-		os.Exit(0)
-	}
-
-	loops, mbErr := strconv.Atoi(os.Args[1])
-	sleep, slErr := strconv.Atoi(os.Args[2])
-
-	if len(os.Args) > 3 && os.Args[3] == "m" {
-		doConcurrently = true
-	}
-
-	if len(os.Args) > 4 && os.Args[4] == "y" {
-		doWriteLock = true
-	}
-
-	if len(os.Args) > 5 && os.Args[5] == "y" {
-		doReadLock = true
-	}
-
-	if mbErr != nil || slErr != nil {
-		os.Exit(1)
-	}
-
-	maxBooks = loops
-	sleepTime = time.Duration(sleep)
-
-}
-
-func queryCacheAndDatabaseLoop() {
+	commandLineHandler()
 
 	start := time.Now().UnixNano()
 
-	if doConcurrently {
-		go kickOffQueryGoRoutines()
-	} else {
-		kickOffQueryGoRoutines()
+	for i := 0; i < maxBooks; i++ {
+
+		if lenOfCache == len(books) {
+			println("")
+			println("All books in cache")
+			break
+		}
+
+		id := rnd.Intn(len(books)) + 1
+		if doConcurrently {
+			go queryCache(id)
+			go queryDatabase(id)
+		} else {
+			queryCache(id)
+			queryDatabase(id)
+		}
+
 	}
 
 	//wait on goroutines to finish
@@ -100,49 +79,92 @@ func queryCacheAndDatabaseLoop() {
 
 }
 
-func kickOffQueryGoRoutines() {
+func commandLineHandler() {
 
-	for i := 0; i < maxBooks; i++ {
-
-		if lenOfCache == len(books) {
-			println("")
-			println("All books in cache")
-			break
-		}
-
-		id := rnd.Intn(len(books)) + 1
-		if doConcurrently {
-			go queryCache(id)
-			go queryDatabase(id)
-		} else {
-			queryCache(id)
-			queryDatabase(id)
-		}
-
-		// if we dont have this, then all threads(goroutines)
-		// are quickly started, then this loop is done,
-		// then main quits before all the goroutines
-		// have a chance to run
-		time.Sleep(sleepTime * time.Millisecond)
-
-		//print(" len:")
-		print(lenOfCache)
-		print(" ")
-
+	if len(os.Args) < 7 {
+		usage()
 	}
 
+	books, mbErr := strconv.Atoi(os.Args[1])
+	loops, mlErr := strconv.Atoi(os.Args[2])
+	sleep, slErr := strconv.Atoi(os.Args[3])
+
+	if mbErr != nil || mlErr != nil || slErr != nil {
+		os.Exit(1)
+	}
+
+	switch os.Args[4] {
+	case "y":
+		doRandom = true
+	case "n":
+		doRandom = false
+	default:
+		{
+			usage()
+		}
+	}
+
+	switch os.Args[5] {
+	case "y":
+		doConcurrently = true
+	case "n":
+		doConcurrently = false
+	default:
+		{
+			usage()
+		}
+	}
+
+	switch os.Args[6] {
+	case "y":
+		doWriteLock = true
+	case "n":
+		doWriteLock = false
+	default:
+		{
+			usage()
+		}
+	}
+
+	switch os.Args[7] {
+	case "y":
+		doReadLock = true
+	case "n":
+		doReadLock = false
+	default:
+		{
+			usage()
+		}
+	}
+
+	/*
+
+
+		maxBooks = loops
+		sleepTime = time.Duration(sleep)
+	*/
+}
+
+func usage() {
+	println("")
+	println("")
+	println("prog <books> <loops> <sleep> <random y|n> <threaded y|n> <y> <y>")
+	println("")
+	println("")
+	os.Exit(1)
 }
 
 // this query's purpose really is just to track num books in cache
 func queryCache(id int) {
+
+	print(".")
+
 	if doReadLock {
 		mutex.Lock()
 	}
 	_, ok := cache[id]
 	if ok {
-		lenOfCache = len(cache)
-	} else {
-		//println("e")
+		fmt.Printf("%d ", len(cache))
 	}
 	if doReadLock {
 		mutex.Unlock()
