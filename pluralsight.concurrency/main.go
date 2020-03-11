@@ -16,30 +16,31 @@ var maxLoops = 0
 var sleepTime time.Duration = 0
 var doRandom = false
 var doConcurrently = false
-var doWriteLock = false
-var doReadLock = false
 
 var cache = map[int]Book{}
 
-var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-var lenOfCache = 0
-
+//=================================================================================================
 func main() {
-
-	commandLineHandler()
 
 	start := time.Now().UnixNano()
 
-	for i := 0; i < maxBooks; i++ {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-		if lenOfCache == len(books) {
-			println("")
-			println("All books in cache")
-			break
+	commandLineHandler()
+
+	id := 0
+	for i := 0; i < maxLoops; i++ {
+
+		if doRandom {
+			id := rnd.Intn(len(maxBooks)) + 1
+		} else {
+			if id >= maxBooks {
+				id = 1
+			} else {
+				id++
+			}
 		}
 
-		id := rnd.Intn(len(books)) + 1
 		if doConcurrently {
 			go queryCache(id)
 			go queryDatabase(id)
@@ -50,10 +51,11 @@ func main() {
 
 	}
 
-	//wait on goroutines to finish
+	println("")
+	println("")
+	timedOut := false
+	start_wait := time.Now().UnixNano()
 	for lenOfCache < len(books) {
-		//println("")
-		//println("_W_")
 		time.Sleep(20 * time.Millisecond)
 		//time.Sleep(20000 * time.Microsecond)
 		if (time.Now().UnixNano()-start)/1000000 > 1000 {
@@ -81,7 +83,7 @@ func main() {
 
 func commandLineHandler() {
 
-	if len(os.Args) < 7 {
+	if len(os.Args) < 6 {
 		usage()
 	}
 
@@ -115,40 +117,16 @@ func commandLineHandler() {
 		}
 	}
 
-	switch os.Args[6] {
-	case "y":
-		doWriteLock = true
-	case "n":
-		doWriteLock = false
-	default:
-		{
-			usage()
-		}
-	}
+	maxBooks = books
+	maxLoops = loops
+	sleepTime = time.Duration(sleep)
 
-	switch os.Args[7] {
-	case "y":
-		doReadLock = true
-	case "n":
-		doReadLock = false
-	default:
-		{
-			usage()
-		}
-	}
-
-	/*
-
-
-		maxBooks = loops
-		sleepTime = time.Duration(sleep)
-	*/
 }
 
 func usage() {
 	println("")
 	println("")
-	println("prog <books> <loops> <sleep> <random y|n> <threaded y|n> <y> <y>")
+	println("prog <books> <loops> <sleep> <random y|n> <threaded y|n> ")
 	println("")
 	println("")
 	os.Exit(1)
@@ -159,16 +137,14 @@ func queryCache(id int) {
 
 	print(".")
 
-	if doReadLock {
-		mutex.Lock()
-	}
+	mutex.Lock()
+
 	_, ok := cache[id]
 	if ok {
 		fmt.Printf("%d ", len(cache))
 	}
-	if doReadLock {
-		mutex.Unlock()
-	}
+
+	mutex.Unlock()
 }
 
 // if book is found in database, it is automatically added to cache.
@@ -179,15 +155,16 @@ func queryDatabase(id int) {
 	time.Sleep(80000 * time.Microsecond)
 	for _, b := range books {
 		if b.ID == id {
+
 			//fmt.Printf("rid:%d b.ID:%d ->same, added\n", id, b.ID)
 			//add found book to cache
-			if doWriteLock {
-				mutex.Lock()
-			}
+
+			mutex.Lock()
+
 			cache[id] = b
-			if doWriteLock {
-				mutex.Unlock()
-			}
+
+			mutex.Unlock()
+
 			return
 		}
 	}
