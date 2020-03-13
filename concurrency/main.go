@@ -21,7 +21,7 @@ var cache = map[int]Book{}
 
 var start = time.Now().UnixNano()
 
-//=============================================================================================
+//================================================================
 func main() {
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -66,7 +66,7 @@ func main() {
 
 }
 
-//=============================================================================================
+//================================================================
 func commandLineHandler() {
 
 	if len(os.Args) < 6 {
@@ -121,7 +121,7 @@ func commandLineHandler() {
 
 }
 
-//=============================================================================================
+//================================================================
 func usage() {
 	println("")
 	println("")
@@ -131,7 +131,7 @@ func usage() {
 	os.Exit(1)
 }
 
-//=============================================================================================
+//================================================================
 func exitWhenFull() {
 	println("")
 	println("")
@@ -145,8 +145,7 @@ func exitWhenFull() {
 	os.Exit(0)
 }
 
-//=============================================================================================
-// this query's purpose really is just to track num books in cache
+//================================================================
 func queryCache(id int) {
 
 	print(".")
@@ -165,13 +164,10 @@ func queryCache(id int) {
 	}
 }
 
-//=============================================================================================
-// if book is found in database, it is automatically added to cache.
-// since it's map, we can re-add without any effects..no need to test.
-// based on key.
+//================================================================
 func queryDatabase(rndId int) {
 
-	time.Sleep(80000 * time.Microsecond)
+	time.Sleep(sleepTime * time.Millisecond)
 	for _, b := range books {
 		if b.ID == rndId {
 			mutex.Lock()
