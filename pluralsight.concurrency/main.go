@@ -19,10 +19,10 @@ var doConcurrently = false
 
 var cache = map[int]Book{}
 
-//=================================================================================================
-func main() {
+var start = time.Now().UnixNano()
 
-	start := time.Now().UnixNano()
+//=============================================================================================
+func main() {
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -32,7 +32,7 @@ func main() {
 	for i := 0; i < maxLoops; i++ {
 
 		if doRandom {
-			id := rnd.Intn(len(maxBooks)) + 1
+			id = rnd.Intn(maxBooks) + 1
 		} else {
 			if id >= maxBooks {
 				id = 1
@@ -53,46 +53,32 @@ func main() {
 
 	println("")
 	println("")
-	timedOut := false
-	start_wait := time.Now().UnixNano()
-	for lenOfCache < len(books) {
-		time.Sleep(20 * time.Millisecond)
-		//time.Sleep(20000 * time.Microsecond)
-		if (time.Now().UnixNano()-start)/1000000 > 1000 {
-			//if (time.Now().UnixNano()-start)/1000 > 1000000 {
-			println("")
-			println("Timed out waiting for queries to complete.")
-			print("Was able to load ")
-			println(lenOfCache)
-			break
-		}
-	}
-
+	println("Main is waiting....")
+	time.Sleep(1000 * time.Millisecond)
 	end := time.Now().UnixNano()
-
 	delta := end - start
-
 	println("")
-	println("------------------------")
+	println("Main is done.")
+	println("")
 	print(delta / 1000000)
 	println(" ms")
-	print(delta / 1000)
-	println(" us")
+	println("")
 
 }
 
+//=============================================================================================
 func commandLineHandler() {
 
 	if len(os.Args) < 6 {
 		usage()
 	}
 
-	books, mbErr := strconv.Atoi(os.Args[1])
-	loops, mlErr := strconv.Atoi(os.Args[2])
+	num_books, mbErr := strconv.Atoi(os.Args[1])
+	num_loops, mlErr := strconv.Atoi(os.Args[2])
 	sleep, slErr := strconv.Atoi(os.Args[3])
 
 	if mbErr != nil || mlErr != nil || slErr != nil {
-		os.Exit(1)
+		usage()
 	}
 
 	switch os.Args[4] {
@@ -117,12 +103,25 @@ func commandLineHandler() {
 		}
 	}
 
-	maxBooks = books
-	maxLoops = loops
+	if num_books < 1 {
+		println("")
+		println("Num books must be at least 1")
+		usage()
+	}
+
+	if num_books > len(books) {
+		println("")
+		fmt.Printf("Num books must be no more than %d\n", len(books))
+		usage()
+	}
+
+	maxBooks = num_books
+	maxLoops = num_loops
 	sleepTime = time.Duration(sleep)
 
 }
 
+//=============================================================================================
 func usage() {
 	println("")
 	println("")
@@ -132,6 +131,21 @@ func usage() {
 	os.Exit(1)
 }
 
+//=============================================================================================
+func exitWhenFull() {
+	println("")
+	println("")
+	println("Cache is full.")
+	println("")
+	end := time.Now().UnixNano()
+	delta := end - start
+	print(delta / 1000000)
+	println(" ms")
+	println("")
+	os.Exit(0)
+}
+
+//=============================================================================================
 // this query's purpose really is just to track num books in cache
 func queryCache(id int) {
 
@@ -145,27 +159,25 @@ func queryCache(id int) {
 	}
 
 	mutex.Unlock()
+
+	if len(cache) >= maxBooks {
+		exitWhenFull()
+	}
 }
 
+//=============================================================================================
 // if book is found in database, it is automatically added to cache.
 // since it's map, we can re-add without any effects..no need to test.
 // based on key.
-func queryDatabase(id int) {
+func queryDatabase(rndId int) {
 
 	time.Sleep(80000 * time.Microsecond)
 	for _, b := range books {
-		if b.ID == id {
-
-			//fmt.Printf("rid:%d b.ID:%d ->same, added\n", id, b.ID)
-			//add found book to cache
-
+		if b.ID == rndId {
 			mutex.Lock()
-
-			cache[id] = b
-
+			cache[rndId] = b
 			mutex.Unlock()
-
-			return
+			break
 		}
 	}
 }
